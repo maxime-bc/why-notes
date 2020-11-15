@@ -1,0 +1,13 @@
+version: '3'
+
+services: 
+  python: 
+    build: ./python
+    volumes: 
+      - ./python:/usr/src/app
+    ports: 
+      - 5000:80
+  postgresql:
+    build: ./postgresql
+    ports:
+      - 5432:5432
