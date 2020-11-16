@@ -18,5 +18,5 @@ CREATE TABLE note (
     CONSTRAINT fk_note_user FOREIGN KEY(id_user) REFERENCES user_profile(id)
 );
 
-
+INSERT INTO TABLE user_profile (email, pwd, first_name, last_name) VALUES ('test@gmail.com', '1234', 'test', 'test');
 

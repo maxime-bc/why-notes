@@ -7,6 +7,8 @@ services:
       - ./python:/usr/src/app
     ports: 
       - 5000:80
+    depends_on:
+      - postgresql
   postgresql:
     build: ./postgresql
     ports:
