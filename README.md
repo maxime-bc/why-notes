@@ -2,9 +2,9 @@
 
 Subject [here](https://docs.google.com/spreadsheets/d/1K-9E6TljJhk7_0Cj3HICfgp03owfm7NNh_-ooE0LL28/edit#gid=0).
 
-commands to run:
+To run :
 ```
-docker build -t postgresql-v1 .
-docker run --name db postgresql-v1
-docker exec -it db psql -U docker
+git clone git@github.com:maxime-bc/no-sql-project.git
+cd no-sql-project
+docker-compose build && docker-compose up
 ```
