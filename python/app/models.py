@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from app import db
+from flask_sqlalchemy import SQLAlchemy
+from app import app
+db = SQLAlchemy(app)
 
 
 class User(db.Model):
@@ -21,7 +23,7 @@ class Note(db.Model):
     title = db.Column(db.String, nullable=False)
     content = db.Column(db.Text, nullable=True)
     creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    edit_date = db.Column(db.DateTime, nullable=False)
+    edit_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     is_public = db.Column(db.Boolean, nullable=False)
     uuid = db.Column(db.String, nullable=False)
