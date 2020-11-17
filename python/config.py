@@ -7,3 +7,4 @@ class Config(object):
     _driver = 'psycopg2'
     SQLALCHEMY_DATABASE_URI = f'{_dialect}+{_driver}://{_user}:{_password}@{_host}/{_database}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = '12345678'
