@@ -1,6 +1,9 @@
 FROM python:3
 
 ENV PYTHONUNBUFFERED 1
+ENV FLASK_APP run.py
+ENV FLASK_ENV development
+
 WORKDIR /usr/src/app
 
 COPY requirements.txt .
@@ -10,4 +13,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD [ "python", "app.py" ]
+CMD flask run --host 0.0.0.0
