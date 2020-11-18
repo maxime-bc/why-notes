@@ -32,9 +32,27 @@ def new():
                     uuid='uuid')
         db.session.add(note)
         db.session.commit()
-        flash('Your note is created !')
+        flash('Your note has been created !')
         return redirect(url_for('index'))
-    return render_template('new.html', title='New note', form=form)
+    return render_template('note_form.html', title='New note', form=form)
+
+
+@app.route('/edit/<int:note_id>',  methods=['GET', 'POST'])
+@login_required
+def edit(note_id):
+    form = NoteForm()
+    if form.validate_on_submit():
+        note = Note.query.filter_by(id=note_id).first()
+        print(note)
+        note.title = form.title.data
+        note.content = form.content.data
+        note.is_public = form.is_public.data
+        note.edit_date = datetime.now()
+        print(note)
+        db.session.commit()
+        flash('Your note has been updated !')
+        return redirect(url_for('index'))
+    return render_template('note_form.html', title='Update a note', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])

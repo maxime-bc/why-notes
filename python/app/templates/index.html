@@ -14,7 +14,7 @@
             <h1>Your notes :</h1>
         {% if notes %}
             {% for note in notes %}
-                {% include 'note.html' %}
+                {% include 'display_note.html' %}
             {% endfor %}
         {% else %}
             <p>You haven't written any notes yet !</p>
