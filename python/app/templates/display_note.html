@@ -4,5 +4,5 @@
   <hr class="my-4">
   <p>{{ note.creation_date }}, edited at {{note.edit_date}}</p>
   <a class="btn btn-primary btn-lg" href="{{ url_for('edit', note_id=note.id) }}" role="button">Edit</a>
-  <a class="btn btn-primary btn-lg" href="#" role="button">Delete</a>
+  <a class="btn btn-primary btn-lg" href="{{ url_for('delete', note_id=note.id) }}" role="button">Delete</a>
 </div>

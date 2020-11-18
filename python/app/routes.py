@@ -15,6 +15,9 @@ def index():
     notes = None
     if current_user.is_authenticated:
         notes = current_user.notes.order_by(Note.edit_date.desc())
+        print(len(notes.all()))
+        if len(notes.all()) == 0:
+            notes = None
     return render_template("index.html", title='Your notes', notes=notes)
 
 
@@ -41,6 +44,9 @@ def new():
 @login_required
 def edit(note_id):
     note = Note.query.filter_by(id=note_id).first()
+    if current_user.id != note.id_user:
+        flash('You don\'t have the required permissions to access this content !')
+        return redirect(url_for('index'))
     form = NoteForm(obj=note)
     if form.validate_on_submit():
         print(note)
@@ -53,6 +59,19 @@ def edit(note_id):
         flash('Your note has been updated !')
         return redirect(url_for('index'))
     return render_template('note_form.html', title='Update a note', form=form)
+
+
+@app.route('/delete/<int:note_id>',  methods=['GET', 'POST'])
+@login_required
+def delete(note_id):
+    note = Note.query.get(note_id)
+    if current_user.id != note.id_user:
+        flash('You don\'t have the required permissions to access this content !')
+        return redirect(url_for('index'))
+    db.session.delete(note)
+    db.session.commit()
+    flash('Your note has been deleted !')
+    return redirect(url_for('index'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
