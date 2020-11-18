@@ -1,8 +1,21 @@
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
-{% block content %}
-    <h1>Hi, {{ current_user.first_name }}!</h1>
-    {% for post in posts %}
-    <div><p>{{ note.author.first_name }} says: <b>{{ post.content }}</b></p></div>
-    {% endfor %}
+{% block app_content %}
+
+    {% if current_user.is_anonymous %}
+        <p>Please login or register to write awesome notes !</p>
+    {% else %}
+        <h1>Hi, {{ current_user.first_name }}!</h1>
+        <div>
+        {% if notes %}
+            {% for note in notes %}
+            <p>{{ note.author.first_name }} says: <b>{{ note.content }}</b></p>
+            {% endfor %}
+        {% else %}
+            <p>You haven't written any notes yet!</p>
+        {% endif %}
+        </div>
+    {% endif %}
+
 {% endblock %}
