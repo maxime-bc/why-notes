@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
+import humanfriendly
 
 from config import Config
 
@@ -17,3 +20,10 @@ db.create_all()
 db.session.commit()
 
 from app import routes
+
+
+@app.context_processor
+def utility_processor():
+    def human_readable_delta(timestamp):
+        return humanfriendly.format_timespan(round((datetime.now() - timestamp).total_seconds()))
+    return dict(human_readable_delta=human_readable_delta)

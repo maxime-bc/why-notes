@@ -12,10 +12,10 @@ from app.forms import LoginForm, RegistrationForm, NoteForm
 @app.route('/')
 @app.route('/index')
 def index():
+
     notes = None
     if current_user.is_authenticated:
         notes = current_user.notes.order_by(Note.edit_date.desc())
-        print(len(notes.all()))
         if len(notes.all()) == 0:
             notes = None
     return render_template("index.html", title='Your notes', notes=notes)
@@ -67,10 +67,10 @@ def delete(note_id):
     note = Note.query.get(note_id)
     if current_user.id != note.id_user:
         flash('You don\'t have the required permissions to access this content !')
-        return redirect(url_for('index'))
-    db.session.delete(note)
-    db.session.commit()
-    flash('Your note has been deleted !')
+    else:
+        db.session.delete(note)
+        db.session.commit()
+        flash('Your note has been deleted !')
     return redirect(url_for('index'))
 
 
@@ -90,7 +90,7 @@ def login():
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
         return redirect(next_page)
-    return render_template('login.html', title='Sign In', form=form)
+    return render_template('login.html', title='Log In', form=form)
 
 
 @app.route('/logout')
