@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+from wtforms.widgets import TextArea
 
 from app import User
 
@@ -25,3 +26,9 @@ class RegistrationForm(FlaskForm):
         if user is not None:
             raise ValidationError('This email is already used.')
 
+
+class NoteForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    content = StringField('Content', widget=TextArea())
+    is_public = BooleanField('Public Note')
+    submit = SubmitField('Create')

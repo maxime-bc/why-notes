@@ -6,14 +6,18 @@
     {% if current_user.is_anonymous %}
         <p>Please login or register to write awesome notes !</p>
     {% else %}
-        <h1>Hi, {{ current_user.first_name }}!</h1>
+        <h1>Hi, {{ current_user.first_name }} ! </h1>
+        <h3> Need to write a new note ? <a href="{{ url_for('new') }}">Click here</a>.</h3>
+        <hr>
+
         <div>
+            <h1>Your notes :</h1>
         {% if notes %}
             {% for note in notes %}
-            <p>{{ note.author.first_name }} says: <b>{{ note.content }}</b></p>
+                {% include 'note.html' %}
             {% endfor %}
         {% else %}
-            <p>You haven't written any notes yet!</p>
+            <p>You haven't written any notes yet !</p>
         {% endif %}
         </div>
     {% endif %}
