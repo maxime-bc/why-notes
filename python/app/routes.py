@@ -40,9 +40,9 @@ def new():
 @app.route('/edit/<int:note_id>',  methods=['GET', 'POST'])
 @login_required
 def edit(note_id):
-    form = NoteForm()
+    note = Note.query.filter_by(id=note_id).first()
+    form = NoteForm(obj=note)
     if form.validate_on_submit():
-        note = Note.query.filter_by(id=note_id).first()
         print(note)
         note.title = form.title.data
         note.content = form.content.data
@@ -85,7 +85,7 @@ def logout():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    form = RegistrationForm()
+    form = RegistrationForm(request.form)
     if form.validate_on_submit():
         user = User(first_name=form.firstname.data, last_name=form.lastname.data, email=form.email.data)
         user.set_password(form.password.data)
