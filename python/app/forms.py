@@ -30,5 +30,5 @@ class RegistrationForm(FlaskForm):
 class NoteForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     content = StringField('Content', widget=TextArea())
-    is_public = BooleanField('Public Note')
+    is_public = BooleanField('Shared note')
     submit = SubmitField('Submit')

@@ -41,7 +41,7 @@ class Note(db.Model):
     edit_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     is_public = db.Column(db.Boolean, nullable=False)
-    uuid = db.Column(db.String, nullable=False)
+    uuid = db.Column(db.String, nullable=False, unique=True)
 
     def __repr__(self):
         return f"<Note(id={self.id}, title={self.title}, content={self.content}, " \

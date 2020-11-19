@@ -1,7 +1,9 @@
+import uuid
 from datetime import datetime
 
 from flask import url_for, render_template, flash, request
 from flask_login import current_user, login_user, logout_user, login_required
+from sqlalchemy.util import NoneType
 from werkzeug.urls import url_parse
 from werkzeug.utils import redirect
 
@@ -12,7 +14,6 @@ from app.forms import LoginForm, RegistrationForm, NoteForm
 @app.route('/')
 @app.route('/index')
 def index():
-
     notes = None
     if current_user.is_authenticated:
         notes = current_user.notes.order_by(Note.edit_date.desc())
@@ -32,12 +33,24 @@ def new():
                     edit_date=datetime.now(),
                     author=current_user,
                     is_public=form.is_public.data,
-                    uuid='uuid')
+                    uuid=uuid.uuid4())
         db.session.add(note)
         db.session.commit()
         flash('Your note has been created !')
         return redirect(url_for('index'))
     return render_template('note_form.html', title='New note', form=form)
+
+
+@app.route('/shared/<uuid>')
+def shared(uuid):
+    note = Note.query.filter_by(uuid=uuid, is_public=True).first()
+
+    if isinstance(note, NoneType):
+        flash('This note has not been found !')
+        return redirect(url_for('index'))
+
+    user = User.query.get(note.id_user)
+    return render_template('shared.html', note=note, user=user)
 
 
 @app.route('/edit/<int:note_id>',  methods=['GET', 'POST'])
