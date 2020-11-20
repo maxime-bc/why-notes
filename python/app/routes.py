@@ -62,12 +62,10 @@ def edit(note_id):
         return redirect(url_for('index'))
     form = NoteForm(obj=note)
     if form.validate_on_submit():
-        print(note)
         note.title = form.title.data
         note.content = form.content.data
         note.is_public = form.is_public.data
         note.edit_date = datetime.now()
-        print(note)
         db.session.commit()
         flash('Your note has been updated !')
         return redirect(url_for('index'))

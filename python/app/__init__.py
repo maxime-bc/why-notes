@@ -4,6 +4,7 @@ from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 import humanfriendly
+from flask_redis import FlaskRedis
 
 from config import Config
 
@@ -13,6 +14,10 @@ login_manager = LoginManager(app)
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 bootstrap = Bootstrap(app)
+redis_client = FlaskRedis(app)
+
+redis_client.set('hello', 'world')
+print('##########################: ' + str(redis_client.get('hello')))
 
 from app.models import db, User, Note
 
