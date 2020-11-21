@@ -2,7 +2,7 @@
   <h1 class="display-4">{{ note.title }} </h1>
   <p class="lead">{{ note.content }}</p>
   <hr class="my-4">
-  <p> Created on {{ note.creation_date.strftime("%Y-%m-%d %H:%M:%S") }}, last edited {{ human_readable_delta(note.edit_date) }} ago.</p>
+  <p> Created on {{ note.creation_date }}, last edited {{ human_readable_delta(note.edit_date) }} ago.</p>
   <a class="btn btn-primary btn-lg" href="{{ url_for('edit', note_id=note.id) }}" role="button">Edit</a>
   <a class="btn btn-primary btn-lg" href="{{ url_for('delete', note_id=note.id) }}" role="button">Delete</a>
   {% if note.is_public %}

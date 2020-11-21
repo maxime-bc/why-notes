@@ -16,9 +16,6 @@ login_manager.login_view = 'login'
 bootstrap = Bootstrap(app)
 redis_client = FlaskRedis(app)
 
-redis_client.set('hello', 'world')
-print('##########################: ' + str(redis_client.get('hello')))
-
 from app.models import db, User, Note
 
 db.create_all()
