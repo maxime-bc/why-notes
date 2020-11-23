@@ -114,8 +114,12 @@ def delete(note_id):
     if current_user.id != note.id_user:
         flash('You don\'t have the required permissions to access this content !')
     else:
+        # remove note from posgres
         db.session.delete(note)
         db.session.commit()
+        # remove note from redis
+        redis_client.lrem('notes_id', 0, str(note.id))
+        redis_client.delete(str(note.id))
         flash('Your note has been deleted !')
     return redirect(url_for('index'))
 
