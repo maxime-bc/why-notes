@@ -13,6 +13,7 @@ from werkzeug.utils import redirect
 
 from app import app, User, db, Note, redis_client
 from app.forms import LoginForm, RegistrationForm, NoteForm
+from app.convert import NoteConverter
 
 
 class RedisPost(object):
@@ -35,18 +36,10 @@ def decode_dict(dict_to_decode: Dict[Any, Any]) -> Dict[Any, Any]:
 def redis_add_notes(notes: BaseQuery):
     pp = pprint.PrettyPrinter(indent=4)
     for note in notes:
-        note_dict = copy.deepcopy(note.__dict__)
+        note_dict = NoteConverter.note_to_dict(note)
         pp.pprint(note_dict)
-
-        # convert dict values to str
-        for key in note_dict:
-            note_dict[key] = str(note_dict[key])
-
-        # pp.pprint(note_dict)
-        pp.pprint(note_dict)
-        note_id = str(note_dict['id'])
-        redis_client.rpush('notes_id', note_id)
-        redis_client.hmset(note_id, note_dict)
+        redis_client.rpush('notes_id', note_dict['id'])
+        redis_client.hmset(note_dict['id'], note_dict)
 
 
 @app.route('/')
@@ -60,40 +53,17 @@ def index():
             print('INSIDE IF !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             notes = current_user.notes.order_by(Note.edit_date.desc())
             redis_add_notes(notes)
+            flash('Your notes where loaded from postgresql !')
         else:
             notes = []
             count = 0
             while count < redis_client.llen('notes_id'):
                 note_id = redis_client.lindex('notes_id', count)
-                # pp.pprint(redis_client.hgetall(note_id))
-                note_dict = decode_dict(redis_client.hgetall(note_id))
-                note_dict['id'] = int(note_dict['id'])
-                note_dict['creation_date'] = datetime.strptime(note_dict['creation_date'], '%Y-%m-%d %H:%M:%S.%f')
-                note_dict['edit_date'] = datetime.strptime(note_dict['edit_date'], '%Y-%m-%d %H:%M:%S.%f')
-                note_dict['id_user'] = int(note_dict['id_user'])
-                note_dict['is_public'] = bool(note_dict['is_public'])
-                note_dict.pop('_sa_instance_state', None)
-                pp.pprint(note_dict)
-                notes.append(Note(**note_dict))
-
-                # print(type(note_dict))
-                # pp.pprint(note_dict)
-                # print(note_dict[b'id'])
-
-                # pp.pprint({'test': 'test1'})
-                # n = Note(id=note_dict['id'], title=note_dict['title'], content=note_dict['content'])
-                # print(n)
-                # notes.append(n)
+                note = NoteConverter.dict_to_note(redis_client.hgetall(note_id))
+                print(note)
+                notes.append(note)
                 count += 1
-
-        # print(type(notes))
-        # print(notes.column_descriptions())
-
-        # for attr_name in Note.__table__.columns:
-        #     for note in notes:
-        #         print(attr_name)
-        #         print(type(attr_name))
-        #         #print(getattr(note, attr_name))
+            flash('Your notes where loaded from redis !')
     print(notes)
     return render_template("index.html", title='Your notes', notes=notes)
 
