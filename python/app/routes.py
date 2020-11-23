@@ -24,7 +24,7 @@ def index():
                     note_dict = NoteConverter.note_to_dict(note)
                     redis_client.lpush('notes_id', note_dict['id'])
                     redis_client.hmset(note_dict['id'], note_dict)
-                flash('Your notes where loaded from postgresql !')
+                flash('Your notes where loaded from postgresql !', 'info')
             else:
                 notes = None
         else:
@@ -34,7 +34,7 @@ def index():
                 note_id = redis_client.lindex('notes_id', count)
                 notes.append(NoteConverter.dict_to_note(redis_client.hgetall(note_id)))
                 count += 1
-            flash('Your notes where loaded from redis !')
+            flash('Your notes where loaded from redis !', 'info')
     return render_template("index.html", title='Your notes', notes=notes)
 
 
@@ -59,7 +59,7 @@ def new():
         # insert into redis
         redis_client.lpush('notes_id', note.id)
         redis_client.hmset(note.id, NoteConverter.note_to_dict(note))
-        flash('Your note has been created !')
+        flash('Your note has been created !', 'success')
         return redirect(url_for('index'))
     return render_template('note_form.html', title='New note', form=form)
 
@@ -69,7 +69,7 @@ def shared(uuid):
     note = Note.query.filter_by(uuid=uuid, is_public=True).first()
 
     if isinstance(note, NoneType):
-        flash('This note has not been found !')
+        flash('This note has not been found !', 'warning')
         return redirect(url_for('index'))
 
     user = User.query.get(note.id_user)
@@ -81,7 +81,7 @@ def shared(uuid):
 def edit(note_id):
     note = Note.query.filter_by(id=note_id).first()
     if current_user.id != note.id_user:
-        flash('You don\'t have the required permissions to access this content !')
+        flash('You don\'t have the required permissions to access this content !', 'warning')
         return redirect(url_for('index'))
     form = NoteForm(obj=note)
     if form.validate_on_submit():
@@ -97,7 +97,7 @@ def edit(note_id):
                                      'content': form.content.data,
                                      'is_public': str(form.is_public.data),
                                      'edit_date': str(edit_date)})
-        flash('Your note has been updated !')
+        flash('Your note has been updated !', 'success')
         return redirect(url_for('index'))
     return render_template('note_form.html', title='Update a note', form=form)
 
@@ -107,7 +107,7 @@ def edit(note_id):
 def delete(note_id):
     note = Note.query.get(note_id)
     if current_user.id != note.id_user:
-        flash('You don\'t have the required permissions to access this content !')
+        flash('You don\'t have the required permissions to access this content !', 'warning')
     else:
         # remove note from posgres
         db.session.delete(note)
@@ -115,7 +115,7 @@ def delete(note_id):
         # remove note from redis
         redis_client.lrem('notes_id', 0, str(note.id))
         redis_client.delete(str(note.id))
-        flash('Your note has been deleted !')
+        flash('Your note has been deleted !', 'success')
     return redirect(url_for('index'))
 
 
@@ -127,7 +127,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+            flash('Invalid username or password', 'warning')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
@@ -154,6 +154,6 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        flash('Congratulations, you are now a registered user!', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
