@@ -15,45 +15,29 @@ from app import app, User, db, Note, redis_client
 from app.forms import LoginForm, RegistrationForm, NoteForm
 from app.convert import NoteConverter
 
-
-class RedisPost(object):
-    def __init__(self, dic):
-        for k, v in dic.items():
-            if not isinstance(k, int):
-                var = k.decode()
-                setattr(self, var, v.decode())
-
-
-def decode_dict(dict_to_decode: Dict[Any, Any]) -> Dict[Any, Any]:
-    decoded_dict = dict()
-    for k, v in dict_to_decode.items():
-        if not isinstance(k, int):
-            var = k.decode()
-            decoded_dict[var] = v.decode()
-    return decoded_dict
-
-
-def redis_add_notes(notes: BaseQuery):
+def _redis_add_notes(notes: BaseQuery):
     pp = pprint.PrettyPrinter(indent=4)
     for note in notes:
         note_dict = NoteConverter.note_to_dict(note)
         pp.pprint(note_dict)
-        redis_client.rpush('notes_id', note_dict['id'])
+        redis_client.lpush('notes_id', note_dict['id'])
         redis_client.hmset(note_dict['id'], note_dict)
 
 
 @app.route('/')
 @app.route('/index')
 def index():
-    pp = pprint.PrettyPrinter(indent=4)
     notes = None
     if current_user.is_authenticated:
 
         if not redis_client.exists('notes_id'):
             print('INSIDE IF !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             notes = current_user.notes.order_by(Note.edit_date.desc())
-            redis_add_notes(notes)
-            flash('Your notes where loaded from postgresql !')
+            if notes.count() != 0:
+                _redis_add_notes(notes)
+                flash('Your notes where loaded from postgresql !')
+            else:
+                notes = None
         else:
             notes = []
             count = 0
@@ -80,8 +64,17 @@ def new():
                     author=current_user,
                     is_public=form.is_public.data,
                     uuid=uuid.uuid4())
+        # insert into postgresql
         db.session.add(note)
+        db.session.flush()
+        # get id of inserted note
+        db.session.refresh(note)
+        print(note.id)
         db.session.commit()
+        # insert into redis
+        redis_client.lpush('notes_id', note.id)
+        redis_client.hmset(note.id, NoteConverter.note_to_dict(note))
+        
         flash('Your note has been created !')
         return redirect(url_for('index'))
     return render_template('note_form.html', title='New note', form=form)
