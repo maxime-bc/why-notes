@@ -15,26 +15,18 @@ from app import app, User, db, Note, redis_client
 from app.forms import LoginForm, RegistrationForm, NoteForm
 from app.convert import NoteConverter
 
-def _redis_add_notes(notes: BaseQuery):
-    pp = pprint.PrettyPrinter(indent=4)
-    for note in notes:
-        note_dict = NoteConverter.note_to_dict(note)
-        pp.pprint(note_dict)
-        redis_client.lpush('notes_id', note_dict['id'])
-        redis_client.hmset(note_dict['id'], note_dict)
-
-
 @app.route('/')
 @app.route('/index')
 def index():
     notes = None
     if current_user.is_authenticated:
-
         if not redis_client.exists('notes_id'):
-            print('INSIDE IF !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             notes = current_user.notes.order_by(Note.edit_date.desc())
             if notes.count() != 0:
-                _redis_add_notes(notes)
+                for note in notes:
+                    note_dict = NoteConverter.note_to_dict(note)
+                    redis_client.lpush('notes_id', note_dict['id'])
+                    redis_client.hmset(note_dict['id'], note_dict)
                 flash('Your notes where loaded from postgresql !')
             else:
                 notes = None
@@ -43,12 +35,9 @@ def index():
             count = 0
             while count < redis_client.llen('notes_id'):
                 note_id = redis_client.lindex('notes_id', count)
-                note = NoteConverter.dict_to_note(redis_client.hgetall(note_id))
-                print(note)
-                notes.append(note)
+                notes.append(NoteConverter.dict_to_note(redis_client.hgetall(note_id)))
                 count += 1
             flash('Your notes where loaded from redis !')
-    print(notes)
     return render_template("index.html", title='Your notes', notes=notes)
 
 
@@ -101,11 +90,18 @@ def edit(note_id):
         return redirect(url_for('index'))
     form = NoteForm(obj=note)
     if form.validate_on_submit():
+        edit_date = datetime.now()
+        # update note in postgresql
         note.title = form.title.data
         note.content = form.content.data
         note.is_public = form.is_public.data
-        note.edit_date = datetime.now()
+        note.edit_date = edit_date
         db.session.commit()
+        # update note in redis
+        redis_client.hmset(note_id, {'title': form.title.data, 
+                                    'content': form.content.data, 
+                                    'is_public': str(form.is_public.data), 
+                                    'edit_date': str(edit_date)})
         flash('Your note has been updated !')
         return redirect(url_for('index'))
     return render_template('note_form.html', title='Update a note', form=form)
