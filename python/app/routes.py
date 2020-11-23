@@ -1,19 +1,16 @@
-import copy
-import pprint
 import uuid
 from datetime import datetime
-from typing import Dict, Any
 
 from flask import url_for, render_template, flash, request
 from flask_login import current_user, login_user, logout_user, login_required
-from flask_sqlalchemy import BaseQuery
 from sqlalchemy.util import NoneType
 from werkzeug.urls import url_parse
 from werkzeug.utils import redirect
 
 from app import app, User, db, Note, redis_client
-from app.forms import LoginForm, RegistrationForm, NoteForm
 from app.convert import NoteConverter
+from app.forms import LoginForm, RegistrationForm, NoteForm
+
 
 @app.route('/')
 @app.route('/index')
@@ -58,12 +55,10 @@ def new():
         db.session.flush()
         # get id of inserted note
         db.session.refresh(note)
-        print(note.id)
         db.session.commit()
         # insert into redis
         redis_client.lpush('notes_id', note.id)
         redis_client.hmset(note.id, NoteConverter.note_to_dict(note))
-        
         flash('Your note has been created !')
         return redirect(url_for('index'))
     return render_template('note_form.html', title='New note', form=form)
@@ -98,10 +93,10 @@ def edit(note_id):
         note.edit_date = edit_date
         db.session.commit()
         # update note in redis
-        redis_client.hmset(note_id, {'title': form.title.data, 
-                                    'content': form.content.data, 
-                                    'is_public': str(form.is_public.data), 
-                                    'edit_date': str(edit_date)})
+        redis_client.hmset(note_id, {'title': form.title.data,
+                                     'content': form.content.data,
+                                     'is_public': str(form.is_public.data),
+                                     'edit_date': str(edit_date)})
         flash('Your note has been updated !')
         return redirect(url_for('index'))
     return render_template('note_form.html', title='Update a note', form=form)

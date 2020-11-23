@@ -1,8 +1,7 @@
 {% extends "base.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
+{% set active_page = "index" %}
 
 {% block app_content %}
-
     {% if current_user.is_anonymous %}
         <h3>Please login or register to write awesome notes !</h3>
     {% else %}
@@ -21,5 +20,4 @@
         {% endif %}
         </div>
     {% endif %}
-
 {% endblock %}

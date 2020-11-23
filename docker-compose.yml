@@ -9,6 +9,7 @@ services:
       - 5000:5000
     depends_on:
       - postgresql
+      - redis
   postgresql:
     build: ./postgresql
     ports:
