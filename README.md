@@ -1,6 +1,6 @@
-# notes.io
+# Why Notes
 
-**notes.io** is a website that allows you to write and share notes. It uses **postgresql** and **redis** to store data.
+**Why Notes** is a website that allows you to write and share notes. It uses **postgresql** and **redis** to store data.
 
 ## Set up
 
@@ -11,7 +11,7 @@ cd no-sql-project
 docker-compose up
 ```
 
-**notes.io** is now running at http://localhost:5000.
+**Why Notes** is now running at http://localhost:5000.
 
 ## Project structure
 
