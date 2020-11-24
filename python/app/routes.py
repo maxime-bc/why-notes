@@ -69,7 +69,7 @@ def shared(uuid):
     note = Note.query.filter_by(uuid=uuid, is_public=True).first()
 
     if isinstance(note, NoneType):
-        flash('This note has not been found !', 'warning')
+        flash('This note does not exists !', 'warning')
         return redirect(url_for('index'))
 
     user = User.query.get(note.id_user)
@@ -80,8 +80,8 @@ def shared(uuid):
 @login_required
 def edit(note_id):
     note = Note.query.filter_by(id=note_id).first()
-    if current_user.id != note.id_user:
-        flash('You don\'t have the required permissions to access this content !', 'warning')
+    if isinstance(note, NoneType) or current_user.id != note.id_user:
+        flash('This note does not exists !', 'warning')
         return redirect(url_for('index'))
     form = NoteForm(obj=note)
     if form.validate_on_submit():
@@ -106,8 +106,8 @@ def edit(note_id):
 @login_required
 def delete(note_id):
     note = Note.query.get(note_id)
-    if current_user.id != note.id_user:
-        flash('You don\'t have the required permissions to access this content !', 'warning')
+    if isinstance(note, NoneType) or current_user.id != note.id_user:
+        flash('This note does not exists !', 'warning')
     else:
         # remove note from posgres
         db.session.delete(note)

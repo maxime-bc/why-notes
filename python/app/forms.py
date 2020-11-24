@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
-from wtforms.widgets import TextArea
 
 from app import User
 
@@ -29,6 +28,6 @@ class RegistrationForm(FlaskForm):
 
 class NoteForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    content = StringField('Content', widget=TextArea())
+    content = TextAreaField('Content', render_kw={'rows': 8})
     is_public = BooleanField('Shared note')
     submit = SubmitField('Submit')

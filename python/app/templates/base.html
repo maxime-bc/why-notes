@@ -65,5 +65,8 @@
             <!-- Optional JavaScript -->
             {{ bootstrap.load_js() }}
         {% endblock %}
+        <!-- 2. Include library -->
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+        <script>var clipboard = new ClipboardJS('.btn');</script>
     </body>
 </html>
