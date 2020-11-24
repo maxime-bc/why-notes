@@ -1,7 +1,9 @@
 version: '3'
 
 services: 
-  python: 
+  python:
+    container_name: 'python_service'
+    hostname: 'python'
     build: ./python
     volumes: 
       - ./python:/usr/src/app
@@ -11,12 +13,16 @@ services:
       - postgresql
       - redis
   postgresql:
+    container_name: 'postgresql_service'
+    hostname: 'postgresql'
     build: ./postgresql
     ports:
       - 5432:5432
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
   redis:
+    container_name: 'redis_service'
+    hostname: 'redis'
     image: redis:6
     ports:
       - 6379:6379
