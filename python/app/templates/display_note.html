@@ -1,6 +1,6 @@
 <div class="jumbotron">
   <h1 class="display-4">{{ note.title }} </h1>
-  <p class="lead">{{ note.content }}</p>
+  <p class="lead" style="white-space: pre-wrap">{{ note.content }}</p>
   <hr class="my-4">
   <p> Created on {{ note.creation_date.strftime("%Y-%m-%d %H:%M:%S") }},
     last edited {{ human_readable_delta(note.edit_date) }} ago.</p>
