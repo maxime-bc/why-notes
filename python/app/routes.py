@@ -17,12 +17,12 @@ from app.forms import LoginForm, RegistrationForm, NoteForm
 def index():
     notes = None
     if current_user.is_authenticated:
-        if not redis_client.exists('notes_id'):
+        if not redis_client.exists(f'{current_user.id}:notes_id'):
             notes = current_user.notes.order_by(Note.edit_date.desc())
             if notes.count() != 0:
                 for note in notes:
                     note_dict = NoteConverter.note_to_dict(note)
-                    redis_client.lpush('notes_id', note_dict['id'])
+                    redis_client.lpush(f'{current_user.id}:notes_id', note_dict['id'])
                     redis_client.hmset(note_dict['id'], note_dict)
                 flash('Your notes where loaded from postgresql !', 'info')
             else:
@@ -30,8 +30,8 @@ def index():
         else:
             notes = []
             count = 0
-            while count < redis_client.llen('notes_id'):
-                note_id = redis_client.lindex('notes_id', count)
+            while count < redis_client.llen(f'{current_user.id}:notes_id'):
+                note_id = redis_client.lindex(f'{current_user.id}:notes_id', count)
                 notes.append(NoteConverter.dict_to_note(redis_client.hgetall(note_id)))
                 count += 1
             flash('Your notes where loaded from redis !', 'info')
@@ -57,7 +57,7 @@ def new():
         db.session.refresh(note)
         db.session.commit()
         # insert into redis
-        redis_client.lpush('notes_id', note.id)
+        redis_client.lpush(f'{current_user.id}:notes_id', note.id)
         redis_client.hmset(note.id, NoteConverter.note_to_dict(note))
         flash('Your note has been created !', 'success')
         return redirect(url_for('index'))
@@ -97,6 +97,9 @@ def edit(note_id):
                                      'content': form.content.data,
                                      'is_public': str(form.is_public.data),
                                      'edit_date': str(edit_date)})
+        # remove note id from list and re-add it at the start
+        redis_client.lrem(f'{current_user.id}:notes_id', 0, str(note.id))
+        redis_client.lpush(f'{current_user.id}:notes_id', note.id)
         flash('Your note has been updated !', 'success')
         return redirect(url_for('index'))
     return render_template('note_form.html', title='Update a note', form=form)
@@ -113,7 +116,7 @@ def delete(note_id):
         db.session.delete(note)
         db.session.commit()
         # remove note from redis
-        redis_client.lrem('notes_id', 0, str(note.id))
+        redis_client.lrem(f'{current_user.id}:notes_id', 0, str(note.id))
         redis_client.delete(str(note.id))
         flash('Your note has been deleted !', 'success')
     return redirect(url_for('index'))
