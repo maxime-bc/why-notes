@@ -9,4 +9,4 @@ WORKDIR /usr/src/app
 COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ./wait-for-it.sh postgresql:5432 -- echo "postgresql is up !" && flask run --host 0.0.0.0
+CMD bash -c 'while !</dev/tcp/postgresql/5432; do sleep 1; done; flask run --host 0.0.0.0'
